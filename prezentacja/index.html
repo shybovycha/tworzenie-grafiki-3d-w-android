@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="pl">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Tworzenie grafiki 3D w Android</title>
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<!-- <link rel="stylesheet" href="css/theme/beige.css" id="theme"> -->
+		<link rel="stylesheet" href="css/theme/league.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<style>
+		body {
+			background: url('images/Blueprint-Background.jpg');
+			/*background: url('images/blueprint-2940484-1920x1200.jpg');*/
+			/*background: url('images/Wallpapers-room_com___bp_scrap_by_itnsltwn_1920x1200.png');*/
+			background-size: 100% 100%;
+		}
+
+		.columns2 {
+			width: 40% !important;
+			display: inline-block !important;
+			margin: 0 3% !important;
+			/*-moz-column-count: 2;
+			-moz-column-gap: 0px;
+			-webkit-column-count: 2;
+			-webkit-column-gap: 0px;
+			column-count: 2;
+			column-gap: 0px;*/
+		}
+
+		.red {
+			color: #FF696A !important;
+		}
+
+		.reveal a {
+			/*color: #B5F6FC;*/
+			color: #FFF204;
+		}
+
+		.reveal a:hover {
+			/*color: #B5F6FC;*/
+			color: #FFB204;
+		}
+		</style>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Tworzenie 3D grafiki w Android</h1>
+					<p>
+						<small>by Artem Shubovych</small>
+					</p>
+				</section>
+
+				<section>
+					<h2>Dlaczego użyć OpenGL?</h2>
+					<ul>
+						<li class="fragment">tworzenie gier</li>
+						<li class="fragment">animacja</li>
+						<li class="fragment">systemy CAD</li>
+						<li class="fragment">graficzne przedstawienie informacji</li>
+						<li class="fragment"><em>(dla fanatyków)</em> przyszybczenie zwykłej aplikacji</li>
+					</ul>
+				</section>
+
+				<section>
+					<aside class="notes">
+						trochę historji
+					</aside>
+
+					<h2>Ewolucja programisty OpenGL</h2>
+				</section>
+
+				<section>
+					<aside class="notes">
+						najwolniejsza implementacja
+					</aside>
+
+					<h2>Fixed Pipeline</h2>
+					<pre><code data-trim="true">
+glBegin(GL_POLYGON);
+	glColor3f(0, 1, 0);
+	glVertex3f(-1, -1, 0);
+	glVertex3f(-1, 1, 0);
+	glVertex3f(1, 1, 0);
+	glVertex3f(1, -1, 0);
+glEnd();
+					</code></pre>
+				</section>
+
+				<section>
+					<aside class="notes">
+						troche szybcza, jednak wolna implementacja
+					</aside>
+
+					<h2>Display Lists</h2>
+					<pre><code data-trim="true">
+GLuint index = glGenLists(1);
+
+glNewList(index, GL_COMPILE);
+	glBegin(GL_POLYGON);
+		glColor3f(0, 1, 0);
+		glVertex3f(-1, -1, 0);
+		glVertex3f(-1, 1, 0);
+		glVertex3f(1, 1, 0);
+		glVertex3f(1, -1, 0);
+	glEnd();
+glEndList();
+
+// ...
+
+glCallList(index);
+					</code></pre>
+				</section>
+
+				<section>
+					<aside class="notes">
+						bardziej szybcza wersja
+					</aside>
+
+					<h2>Drawable Arrays</h2>
+					<pre><code data-trim="true">
+GLfloat vertices[] = { -1, -1, 0,  -1, 1, 0,  1, 1, 0,  1, -1, 0 };
+
+glEnableClientState(GL_VERTEX_ARRAY);
+glVertexPointer(3, GL_FLOAT, 0, vertices);
+glDrawArrays(GL_POLYGONS, 0, 4);
+glDisableClientState(GL_VERTEX_ARRAY);
+					</code></pre>
+				</section>
+
+				<section>
+					<aside class="notes">
+						nowoczęsne podejście. więcej kodu, natomiast więcej szybkości!
+					</aside>
+
+					<h2>Vertex Buffer Objects</h2>
+					<pre><code data-trim="true">
+GLfloat vertices[] = { -1, -1, 0,  -1, 1, 0,  1, 1, 0,  1, -1, 0 };
+GLuint vboId;
+
+glGenBuffersARB(1, &amp;vboId);
+glBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(vertices),
+	vertices, GL_STATIC_DRAW_ARB);
+
+// ...
+
+glBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+glEnableClientState(GL_VERTEX_ARRAY);
+glVertexPointer(3, GL_FLOAT, 0, 0);
+glDrawArrays(GL_POLYGONS, 0, 12);
+glDisableClientState(GL_VERTEX_ARRAY);
+glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+					</code></pre>
+				</section>
+
+				<section>
+					<aside class="notes">
+						użycie shaderów. oni są używane nad VBO albo drawable arrays.
+
+						vertex shader:
+const char *vs_source =
+    "#version 120\n"
+    "attribute vec2 coord2d;"
+    "void main(void) {"
+    "  gl_Position = vec4(coord2d, 0.0, 1.0);"
+    "}";
+
+						fragment shader:
+
+"#version 120           \n"
+    "void main(void) {        "
+    "  gl_FragColor[0] = 0.0; "
+    "  gl_FragColor[1] = 0.0; "
+    "  gl_FragColor[2] = 1.0; "
+    "}";
+					</aside>
+
+					<h2>Shaders</h2>
+					<ol>
+						<li class="fragment">kompilacja wierzchołkowego shaderu</li>
+						<li class="fragment">kompilacja fragment'owego shaderu</li>
+						<li class="fragment">linkowanie programu</li>
+						<li class="fragment">przekazywanie wskazówników <br /> o dane do programu</li>
+						<li class="fragment">przekazywanie danych do programu</li>
+					</ol>
+				</section>
+
+				<section>
+					<h2>Kompilacja shaderów</h2>
+					<h3>Wierzchołkowy shader</h3>
+					<pre><code data-trim="true">
+// kompilujemy wierzchołkowy shader
+GLint compile_ok = GL_FALSE, link_ok = GL_FALSE, program;
+GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+const char *vs_source = "...";
+glShaderSource(vs, 1, &amp;vs_source, NULL);
+glCompileShader(vs);
+glGetShaderiv(vs, GL_COMPILE_STATUS, &amp;compile_ok);
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Kompilacja shaderów</h2>
+					<h3>Fragmentowy shader</h3>
+					<pre data-trim="true"><code>
+// kompilujemy fragmentowy shader
+GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+const char *fs_source = "...";
+glShaderSource(fs, 1, &amp;fs_source, NULL);
+glCompileShader(fs);
+glGetShaderiv(fs, GL_COMPILE_STATUS, &amp;compile_ok);
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Linking programu</h2>
+					<pre data-trim="true"><code>
+// linkujemy program
+program = glCreateProgram();
+glAttachShader(program, vs);
+glAttachShader(program, fs);
+glLinkProgram(program);
+glGetProgramiv(program, GL_LINK_STATUS, &amp;link_ok);
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Przekazywanie danych do programu</h2>
+					<pre data-trim="true"><code>
+// przekazujemy wskazównik o dane wierzchołkowe do programu
+GLint attribute_coord2d;
+const char* attribute_name = "coord2d";
+attribute_coord2d = glGetAttribLocation(program, attribute_name);
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Rendering z użyciem shaderu</h2>
+					<pre data-trim="true"><code>
+// prekazujemy dane przez wskazównik do programu
+// już na etapu renderingu
+
+glUseProgram(program);
+glEnableVertexAttribArray(attribute_coord2d);
+glVertexAttribPointer(
+	attribute_coord2d, // co przekazujemy do programu
+	2,                 // ile elementów dla każdej wierzchówki
+	GL_FLOAT,          // typ każdego elementu
+	GL_FALSE,          // użycie offsetów
+	0,                 // offset
+	vertices           // wskazównik do danych
+);
+
+glDrawArrays(GL_POLYGONS, 0, 4);
+glDisableVertexAttribArray(attribute_coord2d);
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>OpenGL w Android</h2>
+					<h3 class="fragment highlight-red">to tylko OpenGL ES</h3>
+					<p>
+						<span class="fragment">słabszy sprzęt</span>
+						<span class="fragment">&nbsp;->&nbsp;mniej możliwości</span>
+					</p>
+				</section>
+
+				<section>
+					<h2>Czym się różnią OpenGL oraz OpenGL ES?</h2>
+				</section>
+
+				<section>
+					<div class="columns2">
+						<h2 class="fragment">OpenGL</h2>
+						<ul>
+							<li class="fragment">obsługuje wiele podejść renderingu <em class="fragment">(fixed pipeline, display lists, VBO, drawable arrays...)</em></li>
+							<li class="fragment">dowolne type danych</li>
+						</ul>
+					</div>
+					<div class="columns2">
+						<h2 class="fragment">OpenGL ES</h2>
+						<ul>
+							<li class="fragment">tylko VBO</li>
+							<li class="fragment">wyłącznie dane typów fixed-point</li>
+							<li class="fragment">usunięty prymitywy renderingowe</li>
+						</ul>
+					</div>
+				</section>
+
+				<section>
+					<h2>OpenGL ES</h2>
+					<h4>to zmniejszony</h4>
+					<h2 class="fragment shrink">OpenGL 2.0</h2>
+				</section>
+
+				<section>
+					<h2>Jak zacząć pracować z OpenGL ES?</h2>
+				</section>
+
+				<section>
+					<h1>ostreżenie</h1>
+					<h2 class="red">ta prezentacja nie zawiera kierownictwa o podstawach OpenGL</h2>
+				</section>
+
+				<section>
+					<h2>1. tworzymy powierzhnię</h2>
+					<img src="images/screen1.png" />
+				</section>
+
+				<section>
+					<h2>2. ustalimy renderer</h2>
+					<img src="images/screen2.png" />
+				</section>
+
+				<section>
+					<aside class="notes">
+						w tym momencie już można zobaczyć coś na ekranie. to będzie pusty ekran, jednak coś się on robi...
+					</aside>
+
+					<h2>3. definujemy logikę renderingu</h2>
+					<p><em>wewnetrzu renderera</em></p>
+				</section>
+
+				<section>
+					<h1>dziękuję za uwagę!</h1>
+					<p>
+						<a href="https://github.com/shybovycha">Tu jest kod</a>
+					</p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'fade', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					// {
+					// 	src: 'plugin/highlight/highlight.js',
+					// 	async: true,
+					// 	condition: function() { return !!document.querySelector( 'pre code' ); },
+					// 	callback: function() {
+					// 		//hljs.initHighlightingOnLoad();
+					// 		[].forEach.call( document.querySelectorAll( 'pre>code' ), function( v, i) {
+					// 	        hljs.highlightBlock(v);
+					// 	    });
+					// 	}
+					// },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
