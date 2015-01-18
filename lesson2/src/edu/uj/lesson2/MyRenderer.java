@@ -1,16 +1,23 @@
 package edu.uj.lesson2;
 
+import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.util.Log;
 import edu.uj.lesson2.utilities.*;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Random;
 
 public class MyRenderer implements GLSurfaceView.Renderer {
     /**
@@ -38,11 +45,6 @@ public class MyRenderer implements GLSurfaceView.Renderer {
     private Camera mCamera;
 
     /**
-     * Store our model data in a float buffer.
-     */
-    private Triangle triangle1;
-
-    /**
      * This will be used to pass in the transformation matrix.
      */
     private int mMVPMatrixHandle;
@@ -52,46 +54,42 @@ public class MyRenderer implements GLSurfaceView.Renderer {
      */
     private int mPositionHandle;
 
-    /**
-     * This will be used to pass in model color information.
-     */
-    private int mColorHandle;
-
-    /**
-     * How many bytes per float.
-     */
-    private final int mBytesPerFloat = 4;
-
-    /**
-     * How many elements per vertex.
-     */
-    private final int mStrideBytes = 7 * mBytesPerFloat;
-
-    /**
-     * Offset of the position data.
-     */
-    private final int mPositionOffset = 0;
-
-    /**
-     * Size of the position data in elements.
-     */
-    private final int mPositionDataSize = 3;
-
-    /**
-     * Offset of the color data.
-     */
-    private final int mColorOffset = 3;
-
-    /**
-     * Size of the color data in elements.
-     */
-    private final int mColorDataSize = 4;
+    private MD2Model mModel;
+    private int frame = 0;
+    private Context mContext;
+    private Triangle mTriangle;
+    private FloatBuffer mTriangle1Vertices;
 
     /**
      * Initialize the model data.
      */
-    public MyRenderer() {
-        triangle1 = new Triangle();
+    public MyRenderer(Context context) {
+        mContext = context;
+    }
+
+    protected RandomAccessFile toRandomAccessFile(InputStream inputStream) throws IOException {
+        int fileSize = inputStream.available();
+        File tempFile = File.createTempFile("tmp_md2_bin", null, mContext.getCacheDir());
+
+        RandomAccessFile randomAccessFile = new RandomAccessFile(tempFile, "rw");
+
+        byte[] buffer = new byte[fileSize];
+        int numBytesRead = 0;
+
+        while ( (numBytesRead = inputStream.read(buffer)) != -1 ) {
+            randomAccessFile.write(buffer, 0, numBytesRead);
+        }
+
+        randomAccessFile.seek(0);
+
+        return randomAccessFile;
+    }
+
+    public void handleSwipe(float dx, float dy) {
+        Vector3d camPos = mCamera.getEyePos();
+
+        camPos.setX(camPos.getX() + dx);
+        camPos.setZ(camPos.getZ() + dy);
     }
 
     @Override
@@ -105,16 +103,9 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
         Shader vertexShader = new VertexShader(
                 "uniform mat4 u_MVPMatrix;      \n"    // A constant representing the combined model/view/projection matrix.
-
                         + "attribute vec4 a_Position;     \n"    // Per-vertex position information we will pass in.
-                        + "attribute vec4 a_Color;        \n"    // Per-vertex color information we will pass in.
-
-                        + "varying vec4 v_Color;          \n"    // This will be passed into the fragment shader.
-
                         + "void main()                    \n"    // The entry point for our vertex shader.
                         + "{                              \n"
-                        + "   v_Color = a_Color;          \n"    // Pass the color through to the fragment shader.
-                        // It will be interpolated across the triangle.
                         + "   gl_Position = u_MVPMatrix   \n"   // gl_Position is a special variable used to store the final position.
                         + "               * a_Position;   \n"     // Multiply the vertex by the matrix to get the final point in
                         + "}                              \n"    // normalized screen coordinates.
@@ -131,10 +122,21 @@ public class MyRenderer implements GLSurfaceView.Renderer {
         // Set program handles. These will later be used to pass in values to the program.
         mMVPMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
         mPositionHandle = GLES20.glGetAttribLocation(programHandle, "a_Position");
-        mColorHandle = GLES20.glGetAttribLocation(programHandle, "a_Color");
 
         // Tell OpenGL to use this program when rendering.
         shaderProgram.use();
+
+        /*mModel = new MD2Model(mMVPMatrixHandle, mPositionHandle);
+        try {
+            RandomAccessFile md2File = toRandomAccessFile(mContext.getAssets().open("eagle.md2"));
+            mModel.Load(md2File);
+
+            Log.d("MD2 BBOX", String.format("%.3f x %.3f x %.3f", mModel.getWidth(), mModel.getHeight(), mModel.getDepth()));
+        } catch (IOException e) {
+            Log.d("MD2", e.getMessage());
+        }*/
+
+        mTriangle = new Triangle();
     }
 
     @Override
@@ -150,7 +152,7 @@ public class MyRenderer implements GLSurfaceView.Renderer {
         final float bottom = -1.0f;
         final float top = 1.0f;
         final float near = 1.0f;
-        final float far = 10.0f;
+        final float far = 1000.0f;
 
         Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
     }
@@ -162,31 +164,19 @@ public class MyRenderer implements GLSurfaceView.Renderer {
         // Do a complete rotation every 10 seconds.
         long time = SystemClock.uptimeMillis() % 10000L;
         float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
+        // frame = (frame + 1) % mModel.getFrameCount();
+
+        // mModel.Draw(frame);
 
         // Set the camera position (View matrix)
-        // Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         mCamera.project(mViewMatrix);
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-        // Draw the triangle facing straight on.
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);
-        triangle1.draw();
 
-        // Draw one translated a bit down and rotated to be flat on the ground.
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
-        Matrix.rotateM(mModelMatrix, 0, 90.0f, 1.0f, 0.0f, 0.0f);
-        Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);
-        triangle1.draw();
-
-        // Draw one translated a bit to the right and rotated to be facing to the left.
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 1.0f, 0.0f, 0.0f);
-        Matrix.rotateM(mModelMatrix, 0, 90.0f, 0.0f, 1.0f, 0.0f);
-        Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);
-        triangle1.draw();
+        mTriangle.draw(mMVPMatrix, mModelMatrix, mViewMatrix, mProjectionMatrix);
     }
 }

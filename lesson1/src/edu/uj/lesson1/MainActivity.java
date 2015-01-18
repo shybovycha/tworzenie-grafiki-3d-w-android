@@ -40,25 +40,6 @@ public class MainActivity extends Activity {
             return;
         }
 
-        mGLSurfaceView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent == null)
-                    return false;
-
-                final float dx = (motionEvent.getX() / view.getWidth()) * 2 - 1;
-                final float dy = (motionEvent.getY() / view.getHeight()) * 2 - 1;
-
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    // simple touch
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-                    // handle swipe
-                }
-
-                return true;
-            }
-        });
-
         setContentView(mGLSurfaceView);
     }
 
