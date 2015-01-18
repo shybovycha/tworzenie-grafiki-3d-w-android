@@ -59,6 +59,10 @@
 			/*color: #B5F6FC;*/
 			color: #FFB204;
 		}
+
+		.linethrough {
+			text-decoration: line-through;
+		}
 		</style>
 
 		<!--[if lt IE 9]>
@@ -90,6 +94,33 @@
 					</ul>
 				</section>
 
+				<section data-transition="none" data-transition-speed="fast">
+					<h2>Dlaczego użyć OpenGL?</h2>
+					<ul>
+						<li>tworzenie gier</li>
+						<li>animacja</li>
+						<li class="fragment fade-out" data-fragment-index="3">systemy CAD</li>
+						<li class="fragment fade-out" data-fragment-index="2">graficzne przedstawienie informacji</li>
+						<li class="fragment fade-out" data-fragment-index="1"><em>(dla fanatyków)</em> przyszybczenie zwykłej aplikacji</li>
+					</ul>
+				</section>
+
+				<section>
+					<aside class="notes">
+						jak działa OpenGL żeby coś wyświetlić? to jest pełny stek renderingu OpenGL.
+					</aside>
+
+					<h2>OpenGL pipeline</h2>
+					<ol>
+						<li class="fragment">przetwarzanie koordynat</li>
+						<li class="fragment">obliczenie oświetlenia</li>
+						<li class="fragment">aplikacja materialów <br /><small><em>wykrywanie koloru każdego wierzhołku</em></small></li>
+						<li class="fragment">aplikacja tekstur</li>
+						<li class="fragment">dopasowanie efektów <br /><small><em>mgła, alpha test, depth test, pattern test, blending...</em></small></li>
+						<li class="fragment">wyświetlenie na ekranie</li>
+					</ol>
+				</section>
+
 				<section>
 					<aside class="notes">
 						trochę historji
@@ -100,7 +131,7 @@
 
 				<section>
 					<aside class="notes">
-						najwolniejsza implementacja
+						najwolniejsza implementacja. fixed pipeline - to zbiór komand GPU, który definują stan steku renderingu (graphics pipeline). wywołanie każdej z tych komand powoduje zmiany w całym steku. to jest przyczyną wolniejszości.
 					</aside>
 
 					<h2>Fixed Pipeline</h2>
@@ -117,7 +148,7 @@ glEnd();
 
 				<section>
 					<aside class="notes">
-						troche szybcza, jednak wolna implementacja
+						troche szybcza, jednak wolna implementacja. przyszybczenie dzięki zachowywaniu parametrów wszystkich komand fixed pipeline w pamięci karty graficznej.
 					</aside>
 
 					<h2>Display Lists</h2>
@@ -142,7 +173,7 @@ glCallList(index);
 
 				<section>
 					<aside class="notes">
-						bardziej szybcza wersja
+						bardziej szybcza wersja - teraz już nie trzeba wywołać wiele raz komandy renderingu każdego fragmentu
 					</aside>
 
 					<h2>Drawable Arrays</h2>
@@ -158,7 +189,7 @@ glDisableClientState(GL_VERTEX_ARRAY);
 
 				<section>
 					<aside class="notes">
-						nowoczęsne podejście. więcej kodu, natomiast więcej szybkości!
+						nowoczęsne podejście. więcej kodu, natomiast więcej szybkości. dane każdej operacji są zachowywane wewnetrzu GRAM.
 					</aside>
 
 					<h2>Vertex Buffer Objects</h2>
@@ -183,8 +214,28 @@ glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 				</section>
 
 				<section>
+					<h2>Shader - co to jest?</h2>
+
+					<blockquote class="fragment">krótki program komputerowy, (...), który w grafice trójwymiarowej opisuje właściwości pikseli oraz wierzchołków. </blockquote>
+				</section>
+
+				<section>
 					<aside class="notes">
-						użycie shaderów. oni są używane nad VBO albo drawable arrays.
+						w OpenGL są shader programy. oni slugują dla przekazywania danych od wierzhołkowego shaderu do fragmentowego. DirectX ma troche inne typy shaderów (np. pixel shaders).
+					</aside>
+
+					<h2>Typy shaderów</h2>
+
+					<ul>
+						<li class="fragment">vertex shader</li>
+						<li class="fragment">fragment shader</li>
+						<li class="fragment"><em>shader program</em></li>
+					</ul>
+				</section>
+
+				<section>
+					<aside class="notes">
+						użycie shaderów. oni są używane nad VBO albo drawable arrays. tak możemy programować zmiany każdego stopnia steku renderingu
 
 						vertex shader:
 const char *vs_source =
@@ -204,7 +255,8 @@ const char *vs_source =
     "}";
 					</aside>
 
-					<h2>Shaders</h2>
+					<h2>Użycie shaderów</h2>
+					<h3><em>w OpenGL</em></h3>
 					<ol>
 						<li class="fragment">kompilacja wierzchołkowego shaderu</li>
 						<li class="fragment">kompilacja fragment'owego shaderu</li>
@@ -256,7 +308,7 @@ glGetProgramiv(program, GL_LINK_STATUS, &amp;link_ok);
 				<section>
 					<h2>Przekazywanie danych do programu</h2>
 					<pre data-trim="true"><code>
-// przekazujemy wskazównik o dane wierzchołkowe do programu
+// zachowujemy wskazównik o zmiennej shaderu w klientskim programu
 GLint attribute_coord2d;
 const char* attribute_name = "coord2d";
 attribute_coord2d = glGetAttribLocation(program, attribute_name);
@@ -283,6 +335,45 @@ glVertexAttribPointer(
 glDrawArrays(GL_POLYGONS, 0, 4);
 glDisableVertexAttribArray(attribute_coord2d);
 					</code></pre>
+				</section>
+
+				<section>
+					<h2>Przekazywanie danych do shaderu</h2>
+
+					<ol>
+						<li class="fragment">zachowywanie wskazównika do<br />atrybutu shaderu</li>
+						<li class="fragment">włączenie odpowiednego atrybutu</li>
+						<li class="fragment">wskazywanie adresu danych</li>
+						<li class="fragment">wyłączenie atrybutu</li>
+					</ol>
+				</section>
+
+				<section>
+					<aside class="notes">
+						wejście wierzhołkowego shaderu - to tak zwane "vertex attributes". oni mogą być zdefiniowane przez użytkownika lub to może być jeden ze standardowych atrybutów. to mogą być macierze, wektory, liczby.
+					</aside>
+
+					<h2>Wejście wierzhołkowego shaderu</h2>
+
+					<ul>
+						<li class="fragment">material<br /><small><em>(diffuse, specular, shininess...)</em></small></li>
+						<li class="fragment">silnikowe<br /><small><em>(kamera, model, oświetlenie, tajmery...)</em></small></li>
+						<li class="fragment">rendererowe<br /><small><em>(zdefiniowane przez użytkownika)</em></small></li>
+					</ul>
+				</section>
+
+				<section>
+					<aside class="notes">
+						wyjście wierzhołkowego shaderu - to dane, które będą przekazane do następnego poziomu steku renderingu. w przypadku OpenGL ES - to wyświetlenie zdjęcia na ekranie, temu dane będą dotyczące parametrów wierzhółek.
+					</aside>
+
+					<h2>Wyjście wierzhołkowego shaderu</h2>
+
+					<ul>
+						<li class="fragment">pozycja</li>
+						<li class="fragment">rozmiar wierzhółki</li>
+						<li class="fragment">długość do przycinania</li>
+					</ul>
 				</section>
 
 				<section>
@@ -332,28 +423,38 @@ glDisableVertexAttribArray(attribute_coord2d);
 				</section>
 
 				<section>
+					<aside class="notes">
+						na tej powierzhnie będziemy wyświetlać wszystko. ona zastępuje layout dla aktywności. nic ciekawego tutaj
+					</aside>
+
 					<h2>1. tworzymy powierzhnię</h2>
 					<img src="images/screen1.png" />
 				</section>
 
 				<section>
+					<aside class="notes">
+						najprostszy renderer - to klasa, która dziedziczy klasę GLSurfaceView.Renderer .
+						ona powinna przesłączyć metodę onSurfaceCreate, onSurfaceChanged oraz onDrawFrame.
+						wszystko, co chcemy wyświetlić na ekranie - definujemy w metodzie onDrawFrame
+					</aside>
+
 					<h2>2. ustalimy renderer</h2>
 					<img src="images/screen2.png" />
 				</section>
 
 				<section>
 					<aside class="notes">
-						w tym momencie już można zobaczyć coś na ekranie. to będzie pusty ekran, jednak coś się on robi...
+						w tym momencie już można zobaczyć coś na ekranie. jednak, żeby program był interaktywny - musimy zdefiniować co będzie gdy użytkownik, naprzykład, zrobi swipe.
 					</aside>
 
-					<h2>3. definujemy logikę renderingu</h2>
+					<h2>3. definujemy logikę kierowania</h2>
 					<p><em>wewnetrzu renderera</em></p>
 				</section>
 
 				<section>
 					<h1>dziękuję za uwagę!</h1>
 					<p>
-						<a href="https://github.com/shybovycha">Tu jest kod</a>
+						<a href="https://github.com/shybovycha/tworzenie-grafiki-3d-w-android">Tu jest kod</a>
 					</p>
 				</section>
 
