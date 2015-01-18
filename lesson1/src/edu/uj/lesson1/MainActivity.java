@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.View;
 
 public class MainActivity extends Activity {
     /**
@@ -31,12 +33,31 @@ public class MainActivity extends Activity {
             mGLSurfaceView.setEGLContextClientVersion(2);
 
             // Set the renderer to our demo renderer, defined below.
-            mGLSurfaceView.setRenderer(new temp.LessonOneRenderer());
+            mGLSurfaceView.setRenderer(new LessonOneRenderer());
         } else {
             // This is where you could create an OpenGL ES 1.x compatible
             // renderer if you wanted to support both ES 1 and ES 2.
             return;
         }
+
+        mGLSurfaceView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent == null)
+                    return false;
+
+                final float dx = (motionEvent.getX() / view.getWidth()) * 2 - 1;
+                final float dy = (motionEvent.getY() / view.getHeight()) * 2 - 1;
+
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    // simple touch
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                    // handle swipe
+                }
+
+                return true;
+            }
+        });
 
         setContentView(mGLSurfaceView);
     }

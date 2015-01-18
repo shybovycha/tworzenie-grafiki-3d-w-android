@@ -377,12 +377,122 @@ glDisableVertexAttribArray(attribute_coord2d);
 				</section>
 
 				<section>
+					<aside class="notes">
+						wejście fragmentowego shaderu - to fragment oraz jego atrybuty. najbardziej ciekawe atrybuty są zaznaczone na slajdzie.
+					</aside>
+
+					<h2>Wejście fragmentowego shaderu</h2>
+
+					<ul>
+						<li class="fragment">pozycja</li>
+						<li class="fragment">normale</li>
+						<li class="fragment">numer prymitywu</li>
+						<li class="fragment">długość do przycinania</li>
+						<li class="fragment"><em>inne</em></li>
+					</ul>
+				</section>
+
+				<section>
+					<aside class="notes">
+						na wyjściu fragmentowego shaderu mamy fragment z atrybutami koloru, tekstury, oświetlenia i pozycji.
+					</aside>
+
+					<h2>Wyjście fragmentowego shaderu</h2>
+
+					<ul>
+						<li class="fragment">identyfikator materialu</li>
+						<li class="fragment">pozycja</li>
+						<li class="fragment">normale</li>
+						<li class="fragment">diffuse color</li>
+						<li class="fragment">specular color</li>
+						<li class="fragment">głębokość</li>
+						<li class="fragment"><em>inne</em></li>
+					</ul>
+				</section>
+
+				<section>
+					<aside class="notes">
+						dla pierwszego programu wystarczy najprostszych dwoch shaderów, którę nic nie robią opróć przekazywania wejścia do wyjścia. więc, fragmentowy shader zrobi jakiś kolor dla wyjścia.
+					</aside>
+
+					<h2>Identity shaders</h2>
+
+					<h4>vertex shader</h4>
+					<pre><code>
+uniform mat4 u_MVPMatrix;
+attribute vec4 a_Position;
+void main()
+{
+   gl_Position = u_MVPMatrix * a_Position;
+}
+					</code></pre>
+
+					<h4>fragment shader</h4>
+					<pre><code>
+varying vec4 v_Color;
+void main()
+{
+	gl_FragColor[0] = 0.0;
+	gl_FragColor[1] = 0.0;
+	gl_FragColor[2] = 1.0;
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<aside class="notes">
+						w Android mamy tylko zmniejszone wersję OpenGL bo mamy słabszy sprzęt.
+					</aside>
+
 					<h2>OpenGL w Android</h2>
 					<h3 class="fragment highlight-red">to tylko OpenGL ES</h3>
 					<p>
 						<span class="fragment">słabszy sprzęt</span>
 						<span class="fragment">&nbsp;->&nbsp;mniej możliwości</span>
 					</p>
+
+					<p>
+						<span class="fragment">słabszy sprzęt</span>
+						<span class="fragment">&nbsp;->&nbsp;mniej efektów</span>
+					</p>
+
+					<p>
+						<span class="fragment">słabszy sprzęt</span>
+						<span class="fragment">&nbsp;->&nbsp;mniej modele</span>
+					</p>
+
+					<p>
+						<span class="fragment">słabszy sprzęt</span>
+						<span class="fragment">&nbsp;->&nbsp;mniej animacji</span>
+					</p>
+				</section>
+
+				<section>
+					<aside class="notes">
+						co robi grę komputerową ciekawe, piękne?
+					</aside>
+
+					<h2>Piękność gry komputerowej</h2>
+
+					<ul>
+						<li class="fragment">efekty nieba, wody, pogody, <br />ognia, mgły, dymu...</li>
+						<li class="fragment">rzeźba terenu</li>
+						<li class="fragment">modele high poly</li>
+					</ul>
+				</section>
+
+				<section data-transition="none" data-transition-speed="fast">
+					<aside class="notes">
+						na urządzeniach z Android nie mamy tej mocy co komputer ma. temu musimy coś optymizować. dlatego odcinamy wsystkie te piękności.
+					</aside>
+
+					<h2>Optymizacji gier w Android</h2>
+
+					<ul>
+						<li class="linethrough">efekty nieba, wody, pogody, <br />ognia, mgły, dymu...</li>
+						<li class="linethrough">rzeźba terenu</li>
+						<li class="linethrough">modele high poly</li>
+					</ul>
 				</section>
 
 				<section>
@@ -408,18 +518,7 @@ glDisableVertexAttribArray(attribute_coord2d);
 				</section>
 
 				<section>
-					<h2>OpenGL ES</h2>
-					<h4>to zmniejszony</h4>
-					<h2 class="fragment shrink">OpenGL 2.0</h2>
-				</section>
-
-				<section>
 					<h2>Jak zacząć pracować z OpenGL ES?</h2>
-				</section>
-
-				<section>
-					<h1>ostreżenie</h1>
-					<h2 class="red">ta prezentacja nie zawiera kierownictwa o podstawach OpenGL</h2>
 				</section>
 
 				<section>
@@ -427,7 +526,7 @@ glDisableVertexAttribArray(attribute_coord2d);
 						na tej powierzhnie będziemy wyświetlać wszystko. ona zastępuje layout dla aktywności. nic ciekawego tutaj
 					</aside>
 
-					<h2>1. tworzymy powierzhnię</h2>
+					<h2>1. Tworzymy powierzhnię</h2>
 					<img src="images/screen1.png" />
 				</section>
 
@@ -438,17 +537,17 @@ glDisableVertexAttribArray(attribute_coord2d);
 						wszystko, co chcemy wyświetlić na ekranie - definujemy w metodzie onDrawFrame
 					</aside>
 
-					<h2>2. ustalimy renderer</h2>
+					<h2>2. Ustalimy renderer</h2>
 					<img src="images/screen2.png" />
 				</section>
 
 				<section>
 					<aside class="notes">
-						w tym momencie już można zobaczyć coś na ekranie. jednak, żeby program był interaktywny - musimy zdefiniować co będzie gdy użytkownik, naprzykład, zrobi swipe.
+						w tym momencie już można zobaczyć coś na ekranie. jednak, żeby program był interaktywny - musimy zdefiniować co będzie gdy użytkownik, naprzykład, zrobi swipe. dlatego dość zadać dla powierzchnę onTouchListener
 					</aside>
 
-					<h2>3. definujemy logikę kierowania</h2>
-					<p><em>wewnetrzu renderera</em></p>
+					<h2>3. Definujemy logikę kierowania</h2>
+					<img src="images/screen3.png" />
 				</section>
 
 				<section>
