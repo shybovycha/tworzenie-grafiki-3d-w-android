@@ -441,62 +441,6 @@ void main()
 
 				<section>
 					<aside class="notes">
-						Prosze zwrócić uwagę na mnożenie macierze u_MVPMatrix a a_Position.
-						To jest przetwarzanie macierzy widoku. W steku graficznym nie ma
-						pojęcia kamery, pozycji modele czyli czegoś takiego. Natomiast jest centrum
-						światu oraz przetwarzanie macierze. Żeby przesunąć kameru, trzeba napierw przetworzyć macierze widoku jako potrebuję kamera, po tym pomnożyć macierze proekcji na macierze widoku i zachować wynik w macierze MVP (Model-View-Projection). I te macierze trzeba użyć w każdym shaderu wierzhołkowym dla przetwarzania pozycji wierzhołków.
-					</aside>
-
-					<h2>Przesuwanie kamery</h2>
-
-					<ul>
-						<li class="fragment">mViewMatrix &larr; Matrix.setLookAtM(...)</li>
-						<li class="fragment">MVPMatrix &larr; mProjectionMatrix &times; mViewMatrix</li>
-						<li class="fragment">gl_Position = u_MVPMatrix * a_Position</li>
-					</ul>
-				</section>
-
-				<section>
-					<h2>Przesuwanie modele</h2>
-
-					<ul>
-						<li class="fragment">setIdentity(...)</li>
-						<li class="fragment">mMVPMatrix &larr; mViewMatrix &times; mModelMatrix</li>
-						<li class="fragment">mMVPMatrix &larr; mProjectionMatrix &times; mMVPMatrix</li>
-						<li class="fragment">gl_Position = u_MVPMatrix * a_Position</li>
-					</ul>
-				</section>
-
-				<section>
-					<aside class="notes">
-						w Android mamy tylko zmniejszone wersję OpenGL bo mamy słabszy sprzęt.
-					</aside>
-
-					<h2>OpenGL w Android</h2>
-					<h3 class="fragment highlight-red">to tylko OpenGL ES</h3>
-					<p>
-						<span class="fragment">słabszy sprzęt</span>
-						<span class="fragment">&nbsp;->&nbsp;mniej możliwości</span>
-					</p>
-
-					<p>
-						<span class="fragment">słabszy sprzęt</span>
-						<span class="fragment">&nbsp;->&nbsp;mniej efektów</span>
-					</p>
-
-					<p>
-						<span class="fragment">słabszy sprzęt</span>
-						<span class="fragment">&nbsp;->&nbsp;mniej modele</span>
-					</p>
-
-					<p>
-						<span class="fragment">słabszy sprzęt</span>
-						<span class="fragment">&nbsp;->&nbsp;mniej animacji</span>
-					</p>
-				</section>
-
-				<section>
-					<aside class="notes">
 						co robi grę komputerową ciekawe, piękne?
 					</aside>
 
@@ -509,18 +453,38 @@ void main()
 					</ul>
 				</section>
 
-				<section data-transition="none" data-transition-speed="fast">
+				<section>
+					<h2>Co można utworzyć dzięki shaderam</h2>
+
+					<img src="images/lamp_9h_rendering.png" class="fragment" />
+				</section>
+
+				<section>
 					<aside class="notes">
-						na urządzeniach z Android nie mamy tej mocy co komputer ma. temu musimy coś optymizować. dlatego odcinamy wsystkie te piękności.
+						w Android mamy tylko zmniejszone wersję OpenGL bo mamy słabszy sprzęt.
 					</aside>
 
-					<h2>Optymizacji gier w Android</h2>
+					<h2>OpenGL w Android</h2>
+					<h3 class="fragment highlight-red">to tylko OpenGL ES</h3>
+					<p>
+						<span class="fragment">słabszy sprzęt</span>
+						<span class="fragment">&nbsp;&rarr;&nbsp;mniej możliwości</span>
+					</p>
 
-					<ul>
-						<li class="linethrough">efekty nieba, wody, pogody, <br />ognia, mgły, dymu...</li>
-						<li class="linethrough">rzeźba terenu</li>
-						<li class="linethrough">modele high poly</li>
-					</ul>
+					<p>
+						<span class="fragment">słabszy sprzęt</span>
+						<span class="fragment">&nbsp;&rarr;&nbsp;mniej efektów</span>
+					</p>
+
+					<p>
+						<span class="fragment">słabszy sprzęt</span>
+						<span class="fragment">&nbsp;&rarr;&nbsp;mniej modele</span>
+					</p>
+
+					<p>
+						<span class="fragment">słabszy sprzęt</span>
+						<span class="fragment">&nbsp;&rarr;&nbsp;mniej animacji</span>
+					</p>
 				</section>
 
 				<section>
@@ -543,6 +507,73 @@ void main()
 							<li class="fragment">usunięty prymitywy renderingowe</li>
 						</ul>
 					</div>
+				</section>
+
+				<section>
+					<aside class="notes">
+						na urządzeniach z Android nie mamy tej mocy co komputer ma. temu musimy coś optymizować. dlatego odcinamy wsystkie te piękności.
+					</aside>
+
+					<h2>Optymizacji gier w Android</h2>
+
+					<ul>
+						<li class="linethrough">efekty nieba, wody, pogody, <br />ognia, mgły, dymu...</li>
+						<li class="linethrough">rzeźba terenu</li>
+						<li class="linethrough">modele high poly</li>
+					</ul>
+				</section>
+
+				<section>
+					<aside class="notes">
+						Dlatego, że niestety nie możemy utworzyć czegoś żłożonego, możemy natomiast utworzyć czegoś prostszego jako animacja modele przy użyciu plików formatu MD2. Na tym zdjęciu tego nie widać, ale to modele jest animowane.
+					</aside>
+
+					<h2>Co można zrobić w OpenGL ES?</h2>
+
+					<img src="images/screen12.png" />
+				</section>
+
+				<section>
+					<h2>Zalety OpenGL ES</h2>
+
+					<ul>
+						<li class="fragment">można zrobić grę trójwymiarowę <br />dla mobilnych urządzeń</li>
+						<li class="fragment">szybke przepisanie kodu do OpenGL</li>
+						<li class="fragment">WebGL - jeszcze więcej przenośności!</li>
+					</ul>
+				</section>
+
+				<section>
+					<aside class="notes">
+						zrobienie czegoś wielkiego lub ciekawego albo nie jest możliwe albo bardzo złożone.
+					</aside>
+
+					<h2>Wady OpenGL ES</h2>
+
+					<ul>
+						<li class="fragment">złożoność</li>
+						<li class="fragment">małe API</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Złożoność OpenGL ES</h2>
+
+					<p><span class="fragment">wyświetlienie animacji MD2</span><span class="fragment">&rarr;500+ wierszów kodu!</span></p>
+				</section>
+
+				<section>
+					<aside class="notes">
+						dlatego żeby uprościć pracę z OpenGL ES istnieją kilka pięknych bibliotek. natomiast w tej prezentacji ogarniemy goły OpenGL ES
+					</aside>
+
+					<h2>Biblioteki</h2>
+
+					<ul>
+						<li class="fragment">JPCT</li>
+						<li class="fragment">LWJGL</li>
+						<li class="fragment">jMonkey</li>
+					</ul>
 				</section>
 
 				<section>
@@ -576,6 +607,61 @@ void main()
 
 					<h2>3. Definujemy logikę kierowania</h2>
 					<img src="images/screen3.png" />
+				</section>
+
+				<section>
+					<aside class="notes">
+						Prosze zwrócić uwagę na mnożenie macierze u_MVPMatrix a a_Position w kodzie najprostszego shaderu.
+						To jest przetwarzanie macierzy widoku. W steku graficznym nie ma
+						pojęcia kamery, pozycji modele czyli czegoś takiego. Natomiast jest centrum
+						światu oraz przetwarzanie macierze. Żeby przesunąć kameru, trzeba napierw przetworzyć macierze widoku jako potrebuję kamera, po tym pomnożyć macierze proekcji na macierze widoku i zachować wynik w macierze MVP (Model-View-Projection). I te macierze trzeba użyć w każdym shaderu wierzhołkowym dla przetwarzania pozycji wierzhołków.
+					</aside>
+
+					<h2>Przesuwanie kamery</h2>
+
+					<ul>
+						<li class="fragment">mViewMatrix &larr; Matrix.setLookAtM(...)</li>
+						<li class="fragment">MVPMatrix &larr; mProjectionMatrix &times; mViewMatrix</li>
+						<li class="fragment">gl_Position = u_MVPMatrix * a_Position</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Przesuwanie modele</h2>
+
+					<ul>
+						<li class="fragment">setIdentity(...)</li>
+						<li class="fragment">mMVPMatrix &larr; mViewMatrix &times; mModelMatrix</li>
+						<li class="fragment">mMVPMatrix &larr; mProjectionMatrix &times; mMVPMatrix</li>
+						<li class="fragment">gl_Position = u_MVPMatrix * a_Position</li>
+					</ul>
+				</section>
+
+				<section>
+					<aside class="notes">
+						Ten przykład wzięty ze strony Android Developers i troche zmodyfikowany. Trójkąt zielony jest na doly, a trójkąty czerwony oraz niebieski - obók. Przy zmianie pozycji kamery można zobaczyć, że nie tylko te trzy trójkąty można obserwować z innej strony, ale ma miejsce ciekawy błąd testu głębokości.
+					</aside>
+
+					<h2>Przykład - ruch kamery</h2>
+
+					<img src="images/screen9.png" />
+				</section>
+
+				<section data-transition="none" data-transition-speed="fast">
+					<h2>Przykład - ruch kamery</h2>
+
+					<img src="images/screen10.png" />
+				</section>
+
+				<section>
+					<aside class="notes">
+						tworzenie gier przy użyciu gołego API jest sprawa bardzo skomplikowana i długa. dlatego bardzo zachęcam do użycia conajmniej jednej ze wskazanych powyżej bibliotek.
+					</aside>
+
+					<h2 class="red">Ostreżenie</h2>
+
+					<h3 class="fragment">Nie próbujcie tego w domu!</h3>
+					<h5 class="fragment">użycie bibliotek jest przyczyną długowieczności</h5>
 				</section>
 
 				<section>

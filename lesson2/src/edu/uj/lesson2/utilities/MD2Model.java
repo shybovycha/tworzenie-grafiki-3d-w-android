@@ -1,15 +1,12 @@
 package edu.uj.lesson2.utilities;
 
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-
-// import org.lwjgl.opengl.GL11;
 
 public class MD2Model {
     protected RandomAccessFile in;
