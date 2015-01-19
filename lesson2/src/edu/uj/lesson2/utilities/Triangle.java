@@ -26,8 +26,6 @@ public class Triangle {
     private int mPositionHandle;
     private ShaderProgram identityProgram;
 
-    //float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
-
     static final int strideBytes = COORDS_PER_VERTEX * BYTES_PER_FLOAT;
 
     public Triangle() {
@@ -60,19 +58,13 @@ public class Triangle {
     public void draw(float[] mMVPMatrix, float[] mModelMatrix, float[] mViewMatrix, float[] mProjectionMatrix) {
         vertexBuffer.position(0);
 
-        // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
-
         // Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
                 strideBytes, vertexBuffer);
 
-        // get handle to fragment shader's vColor member
-        // int mColorHandle = GLES20.glGetUniformLocation(identityProgram.getHandle(), "vColor");
-
-        // Set color for drawing the triangle
-        // GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+        // Enable a handle to the triangle vertices
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
 
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
 

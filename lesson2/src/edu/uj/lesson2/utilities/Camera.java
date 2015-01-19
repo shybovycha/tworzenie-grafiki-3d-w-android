@@ -1,6 +1,7 @@
 package edu.uj.lesson2.utilities;
 
 import android.opengl.Matrix;
+import android.util.Log;
 
 /**
  * Created by shybovycha on 16.12.14.

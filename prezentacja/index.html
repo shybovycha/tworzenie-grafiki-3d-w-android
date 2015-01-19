@@ -441,6 +441,34 @@ void main()
 
 				<section>
 					<aside class="notes">
+						Prosze zwrócić uwagę na mnożenie macierze u_MVPMatrix a a_Position.
+						To jest przetwarzanie macierzy widoku. W steku graficznym nie ma
+						pojęcia kamery, pozycji modele czyli czegoś takiego. Natomiast jest centrum
+						światu oraz przetwarzanie macierze. Żeby przesunąć kameru, trzeba napierw przetworzyć macierze widoku jako potrebuję kamera, po tym pomnożyć macierze proekcji na macierze widoku i zachować wynik w macierze MVP (Model-View-Projection). I te macierze trzeba użyć w każdym shaderu wierzhołkowym dla przetwarzania pozycji wierzhołków.
+					</aside>
+
+					<h2>Przesuwanie kamery</h2>
+
+					<ul>
+						<li class="fragment">mViewMatrix &larr; Matrix.setLookAtM(...)</li>
+						<li class="fragment">MVPMatrix &larr; mProjectionMatrix &times; mViewMatrix</li>
+						<li class="fragment">gl_Position = u_MVPMatrix * a_Position</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Przesuwanie modele</h2>
+
+					<ul>
+						<li class="fragment">setIdentity(...)</li>
+						<li class="fragment">mMVPMatrix &larr; mViewMatrix &times; mModelMatrix</li>
+						<li class="fragment">mMVPMatrix &larr; mProjectionMatrix &times; mMVPMatrix</li>
+						<li class="fragment">gl_Position = u_MVPMatrix * a_Position</li>
+					</ul>
+				</section>
+
+				<section>
+					<aside class="notes">
 						w Android mamy tylko zmniejszone wersję OpenGL bo mamy słabszy sprzęt.
 					</aside>
 

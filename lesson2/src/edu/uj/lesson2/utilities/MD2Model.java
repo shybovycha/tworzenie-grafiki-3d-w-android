@@ -35,15 +35,25 @@ public class MD2Model {
     protected int mMVPMatrixHandle;
     protected int mPositionHandle;
 
-    public MD2Model(int MVPMatrixHandle, int positionHandle) {
+//    private ShaderProgram identityProgram;
+
+    public MD2Model(int positionHandle, int mvpMatrixHandle) {
         face = null;
         frame = null;
         UV = null;
         Head = new MD2Header();
         TexID = 0;
 
-        mMVPMatrixHandle = MVPMatrixHandle;
+//        identityProgram = new ShaderProgram();
+//        identityProgram.attach(new IdentityFragmentShader());
+//        identityProgram.attach(new IdentityVertexShader());
+//        identityProgram.use();
+//
+//        mPositionHandle = GLES20.glGetAttribLocation(identityProgram.getHandle(), "vPosition");
+//        mMVPMatrixHandle = GLES20.glGetAttribLocation(identityProgram.getHandle(), "u_MVPMatrix");
+
         mPositionHandle = positionHandle;
+        mMVPMatrixHandle = mvpMatrixHandle;
     }
 
     private void LoadHeader() {
@@ -298,24 +308,29 @@ public class MD2Model {
         if (Frame >= nFrames)
             Frame = 0;
 
-        final int mStrideBytes = 3; // elements per vertex
         final int mPositionOffset = 0;
-        final int mPositionDataSize = 3;
+        final int mElementsPerVertex = 3;
+        final int mBytesPerFloat = 4;
+        final int mStrideBytes = mElementsPerVertex * mBytesPerFloat; // elements per vertex
 
-        Matrix.setIdentityM(mModelMatrix, 0);
+//        Matrix.setIdentityM(mModelMatrix, 0);
 
         FloatBuffer modelVertices = mFrameBuffers[Frame];
         modelVertices.position(mPositionOffset);
 
-        GLES20.glVertexAttribPointer(mPositionHandle, mPositionDataSize, GLES20.GL_FLOAT, false,
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
+
+        GLES20.glVertexAttribPointer(mPositionHandle, mElementsPerVertex, GLES20.GL_FLOAT, false,
                 mStrideBytes, modelVertices);
 
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+//        Matrix.setIdentityM(mModelMatrix, 0);
+//        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+//        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+//
+//        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, modelVertices.limit() / mElementsPerVertex);
 
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+        GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
     public int getFrameCount() {

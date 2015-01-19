@@ -104,10 +104,10 @@ public class LessonOneRenderer implements GLSurfaceView.Renderer {
                 1.0f, 0.0f, 0.0f, 1.0f,
 
                 0.5f, -0.25f, 0.0f,
-                0.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, 0.0f, 0.0f, 1.0f,
 
                 0.0f, 0.5f, 0.0f,
-                0.0f, 1.0f, 0.0f, 1.0f
+                1.0f, 0.0f, 0.0f, 1.0f
         };
 
         // This triangle is yellow, cyan, and magenta.
@@ -115,13 +115,13 @@ public class LessonOneRenderer implements GLSurfaceView.Renderer {
                 // X, Y, Z,
                 // R, G, B, A
                 -0.5f, -0.25f, 0.0f,
-                1.0f, 1.0f, 0.0f, 1.0f,
+                0.0f, 1.0f, 0.0f, 1.0f,
 
                 0.5f, -0.25f, 0.0f,
-                0.0f, 1.0f, 1.0f, 1.0f,
+                0.0f, 1.0f, 0.0f, 1.0f,
 
                 0.0f, 0.5f, 0.0f,
-                1.0f, 0.0f, 1.0f, 1.0f
+                0.0f, 1.0f, 0.0f, 1.0f
         };
 
         // This triangle is white, gray, and black.
@@ -129,13 +129,13 @@ public class LessonOneRenderer implements GLSurfaceView.Renderer {
                 // X, Y, Z,
                 // R, G, B, A
                 -0.5f, -0.25f, 0.0f,
-                1.0f, 1.0f, 1.0f, 1.0f,
+                0.0f, 0.0f, 1.0f, 1.0f,
 
                 0.5f, -0.25f, 0.0f,
-                0.5f, 0.5f, 0.5f, 1.0f,
+                0.0f, 0.0f, 1.0f, 1.0f,
 
                 0.0f, 0.5f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
+                0.0f, 0.0f, 1.0f, 1.0f
         };
 
         // Initialize the buffers.
@@ -159,8 +159,8 @@ public class LessonOneRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.5f, 0.5f, 0.5f, 0.5f);
 
         // Position the eye behind the origin.
-        final float eyeX = 0.0f;
-        final float eyeY = 0.0f;
+        final float eyeX = -40.0f;
+        final float eyeY = -20.0f;
         final float eyeZ = 1.5f;
 
         // We are looking toward the distance
@@ -322,6 +322,8 @@ public class LessonOneRenderer implements GLSurfaceView.Renderer {
         float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
 
         // Set the camera position (View matrix)
+        // swap comment sign to see how view matrix changes
+        // Matrix.setLookAtM(mViewMatrix, 0, 3, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
         // Calculate the projection and view transformation
